@@ -88,37 +88,19 @@ apt-get update \
     && rm -rf /var/cache/apt/* /tmp/a.txt /tmp/b.txt
 
 ################################################################################
-# builder This should be dockerized => Check more idea from Dockerfile_build_vagrant
+# node builder 
 ###############################################################################
-#sed -i 's#http://archive.ubuntu.com/ubuntu/#mirror://mirrors.ubuntu.com/mirrors.txt#' /etc/apt/sources.list;
-
-apt update \
-    && apt install -y --no-install-recommends curl ca-certificates gnupg patch
-
-# nodejs
-curl -sL https://deb.nodesource.com/setup_12.x | bash - \
-    && echo all > /etc/gcrypt/hwf.deny \
-    && apt update \
-    && apt install -y nodejs
-
-# yarn
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
-    && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
-    && echo all > /etc/gcrypt/hwf.deny \
-    && apt update \
-    && apt install -y yarn
-
-# build frontend
-cd /docker-ubuntu-vnc-desktop/web \
-    && yarn \
-    && yarn build
-sed -i 's#app/locale/#novnc/app/locale/#' /docker-ubuntu-vnc-desktop/web/dist/static/novnc/app/ui.js
-
+mv Dockerfile_novnc_node_web /docker-ubuntu-vnc-desktop/Dockerfile_novnc_node_web
+cd /docker-ubuntu-vnc-desktop
+docker build -t novnc_node_web -f Dockerfile_novnc_node_web .
+cd -
 ################################################################################
 # merge
 ###############################################################################
 mkdir -p /usr/local/lib/web/frontend/
-cp -R /docker-ubuntu-vnc-desktop/web/dist/* /usr/local/lib/web/frontend/
+docker run --rm -v /usr/local/lib/web/frontend/:/frontend novnc_node_web
+docker image rm novnc_node_web
+
 cp -R /docker-ubuntu-vnc-desktop/rootfs/* /
 ln -sf /usr/local/lib/web/frontend/static/websockify /usr/local/lib/web/frontend/static/novnc/utils/websockify && \
 	chmod +x /usr/local/lib/web/frontend/static/websockify/run

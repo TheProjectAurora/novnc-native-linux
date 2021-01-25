@@ -63,7 +63,7 @@ Vagrant.configure("2") do |config|
   # SHELL
     #config.vm.provision "file", source: "vagrant_bootstrap.sh", destination: "/home/vagrant/"
     config.vm.provision "file", source: "novnc_generate.sh", destination: "/home/vagrant/"
-    config.vm.provision "file", source: "Dockerfile_build_vagrant", destination: "/home/vagrant/"
+    config.vm.provision "file", source: "Dockerfile_novnc_node_web", destination: "/home/vagrant/"
     #config.vm.provision "file", source: "docker-ubuntu-vnc-desktop", destination: "/home/vagrant/"
     config.vm.provision "shell", path: "vagrant_bootstrap.sh"
 end
