@@ -15,9 +15,9 @@ echo "******************************************"
 ###############################################################################
 
 export DEBIAN_FRONTEND=noninteractive
-apt update \
+apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
     && apt install -y --no-install-recommends software-properties-common curl apache2-utils \
-    && apt update \
+    && apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
     && apt install -y --no-install-recommends --allow-unauthenticated \
         supervisor nginx sudo net-tools zenity xz-utils \
         dbus-x11 x11-utils alsa-utils \
@@ -36,7 +36,7 @@ systemctl disable supervisor.service
 # unlink /var/run/supervisor.sock
 
 # install debs error if combine together
-apt update \
+apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
     && apt install -y --no-install-recommends --allow-unauthenticated \
         xvfb x11vnc \
         vim-tiny firefox ttf-ubuntu-font-family ttf-wqy-zenhei  \
@@ -44,7 +44,7 @@ apt update \
     && apt autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-apt update \
+apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
     && apt install -y gpg-agent \
     && curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && (dpkg -i ./google-chrome-stable_current_amd64.deb || apt-get install -fy) \
@@ -52,7 +52,7 @@ apt update \
     && rm google-chrome-stable_current_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
 
-apt update \
+apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
     && apt install -y --no-install-recommends --allow-unauthenticated \
         lxde gtk2-engines-murrine gnome-themes-standard gtk2-engines-pixbuf gtk2-engines-murrine arc-theme \
     && apt autoclean -y \
@@ -66,7 +66,7 @@ mv -f tini /bin/tini
 chmod +x /bin/tini
 
 # ffmpeg
-apt update \
+apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
     && apt install -y --no-install-recommends --allow-unauthenticated \
         ffmpeg \
     && rm -rf /var/lib/apt/lists/* \
@@ -75,7 +75,7 @@ apt update \
 
 # python library
 cp /docker-ubuntu-vnc-desktop/rootfs/usr/local/lib/web/backend/requirements.txt /tmp/
-apt-get update \
+apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
     && dpkg-query -W -f='${Package}\n' > /tmp/a.txt \
     && apt-get install -y python3-pip python3-dev build-essential \
 	&& pip3 install setuptools wheel && pip3 install -r /tmp/requirements.txt \
@@ -110,6 +110,39 @@ export HOME=/home/ubuntu \
 chmod +x /startup.sh
 sed -i "s|\(.*supervisord.*\)-n\(.*\)|\1 \2|g" /startup.sh
 
+# generate self signed ssl:
+mkdir -p /etc/nginx/ssl/
+tee /etc/nginx/ssl/openssl.cnf << EOF1
+[ req ]
+prompt = no
+distinguished_name = req_distinguished_name
+
+[ req_distinguished_name ]
+C = GB
+ST = Test State
+L = Test Locality
+O = Org Name
+OU = Org Unit Name
+CN = Common Name
+emailAddress = test@email.com
+EOF1
+openssl req -x509 -config /etc/nginx/ssl/openssl.cnf -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
+
+#create user:
+mkdir /home/coder
+adduser --gecos '' --disabled-password coder
+usermod -a -G sudo coder
+chown -R coder:coder /home/coder
+# Set password and other coder user things are handled with noVNC environment
+tee /etc/systemd/novnc_environment.conf << EOF2
+SSL_PORT=443
+USER=coder
+PASSWORD=coderpw
+HOME=/home/coder
+HTTP_PASSWORD=coderpw
+#RESOLUTION=1920x1080
+#X11VNC_ARGS=-multiptr
+EOF2
 # root@ubuntu-focal:~# cat /etc/systemd/system/novnc.service
 tee /etc/systemd/system/novnc.service << END
 [Unit]
@@ -118,8 +151,8 @@ Documentation=http://supervisord.org
 After=network.target
 
 [Service]
-#EnvironmentFile=/etc/my_service/my_service.conf
-#Environment="FOO=bar"
+#User=coder
+EnvironmentFile=/etc/systemd/novnc_environment.conf
 Type=forking
 ExecStart=/startup.sh
 ExecReload=/usr/bin/supervisorctl reload

@@ -12,7 +12,7 @@ echo all > /etc/gcrypt/hwf.deny
 
   #&& apt dist-upgrade -y  
   #
-apt -qq update \
+apt-get -qq -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
   && apt install -qq --no-install-recommends --allow-unauthenticated -y \
   git \
   socat \
