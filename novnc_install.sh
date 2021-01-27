@@ -1,23 +1,66 @@
 #!/bin/sh
+
+# NoVNC orginal implementation: https://github.com/fcwu/docker-ubuntu-vnc-desktop
+#Procedure source: https://hub.docker.com/r/dorowu/ubuntu-desktop-lxde-vnc/dockerfile
+#Docker image: https://hub.docker.com/r/dorowu/ubuntu-desktop-lxde-vnc
+
+
+# PRE WORK:
 set -xe
 
 echo "******************************************"
 echo "INFO: Hello from $0"
 echo "******************************************"
 
-#SOURCE TO WHOLE PROCEDURE: https://hub.docker.com/r/dorowu/ubuntu-desktop-lxde-vnc/dockerfile
-### https://hub.docker.com/r/dorowu/ubuntu-desktop-lxde-vnc
-### https://github.com/fcwu/docker-ubuntu-vnc-desktop
+BASEDIR=$(dirname $0)
 
+# HACK: Hash sum mismatch when apt update Ubuntu 20.04 VM with Multipass
+# Source: https://stackoverflow.com/questions/64120030/hash-sum-mismatch-when-apt-update-ubuntu-20-04-vm-with-multipass
+mkdir -p /etc/gcrypt
+echo all > /etc/gcrypt/hwf.deny
+
+  #&& apt dist-upgrade -y  
+  #
+apt -qq update \
+  && apt install -qq --no-install-recommends --allow-unauthenticated -y \
+  git \
+  socat \
+  docker.io \
+  && apt clean \
+  && rm -rf /var/lib/apt/lists/*
+
+#HACK TO GET GIT working: https://wiki.yoctoproject.org/wiki/Working_Behind_a_Network_Proxy
+#Require also "socat" in apt install ^
+wget -q http://git.yoctoproject.org/cgit/cgit.cgi/poky/plain/scripts/oe-git-proxy -P /bin
+chmod +x /bin/oe-git-proxy
+export GIT_PROXY_COMMAND="oe-git-proxy"
+export NO_PROXY=""
+
+#CLONE NoVNC REPO WITH CHACK => Same problem with virtualbox BOXees: ubuntu/focal64 , generic/debian9 , generic/fedora30
+cd /
+n=0
+until [ $n -ge 5 ]
+do
+   rm -Rf docker-ubuntu-vnc-desktop
+   git clone -b develop --recursive https://github.com/fcwu/docker-ubuntu-vnc-desktop.git && break
+   echo "WARNING: CLONE FAIL - RETRY CLONE"
+   n=$[$n+1]
+   sleep 1
+done
+# IF STILL CONTINUE FAILING => CHECK GOOGLE SEARCH: git clone fail "virtualbox"
+cd -
+
+########################################
+# No_VNC installation procedure to HOST:
 
 ################################################################################
 # base system
 ###############################################################################
 
 export DEBIAN_FRONTEND=noninteractive
-apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
+apt -qq update \
     && apt install -y --no-install-recommends software-properties-common curl apache2-utils \
-    && apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
+    && apt -qq update \
     && apt install -y --no-install-recommends --allow-unauthenticated \
         supervisor nginx sudo net-tools zenity xz-utils \
         dbus-x11 x11-utils alsa-utils \
@@ -26,17 +69,16 @@ apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update 
     && apt autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-#By default NGINX is on????
+#By default NGINX is on
 systemctl stop nginx
 systemctl disable nginx
-#By default supervisord is on????
+#By default supervisord is on
 systemctl stop supervisor.service
 systemctl disable supervisor.service
-# WITHOUT THIS: https://stackoverflow.com/questions/25121838/supervisor-on-debian-wheezy-another-program-is-already-listening-on-a-port-that
-# unlink /var/run/supervisor.sock
+
 
 # install debs error if combine together
-apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
+apt -qq update \
     && apt install -y --no-install-recommends --allow-unauthenticated \
         xvfb x11vnc \
         vim-tiny firefox ttf-ubuntu-font-family ttf-wqy-zenhei  \
@@ -44,15 +86,15 @@ apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update 
     && apt autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
+apt -qq update \
     && apt install -y gpg-agent \
-    && curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && (dpkg -i ./google-chrome-stable_current_amd64.deb || apt-get install -fy) \
-    && curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add \
+    && curl --silent -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && (dpkg -i ./google-chrome-stable_current_amd64.deb || apt install -fy) \
+    && curl --silent -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add \
     && rm google-chrome-stable_current_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
 
-apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
+apt -qq update \
     && apt install -y --no-install-recommends --allow-unauthenticated \
         lxde gtk2-engines-murrine gnome-themes-standard gtk2-engines-pixbuf gtk2-engines-murrine arc-theme \
     && apt autoclean -y \
@@ -61,12 +103,12 @@ apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update 
 
 # tini to fix subreap
 export TINI_VERSION=v0.18.0
-wget https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
+wget -q https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 mv -f tini /bin/tini
 chmod +x /bin/tini
 
 # ffmpeg
-apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
+apt -qq update \
     && apt install -y --no-install-recommends --allow-unauthenticated \
         ffmpeg \
     && rm -rf /var/lib/apt/lists/* \
@@ -75,27 +117,27 @@ apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update 
 
 # python library
 cp /docker-ubuntu-vnc-desktop/rootfs/usr/local/lib/web/backend/requirements.txt /tmp/
-apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
+apt -qq update \
     && dpkg-query -W -f='${Package}\n' > /tmp/a.txt \
-    && apt-get install -y python3-pip python3-dev build-essential \
+    && apt install -y python3-pip python3-dev build-essential \
 	&& pip3 install setuptools wheel && pip3 install -r /tmp/requirements.txt \
     && ln -s /usr/bin/python3 /usr/local/bin/python \
     && dpkg-query -W -f='${Package}\n' > /tmp/b.txt \
-    && apt-get remove -y `diff --changed-group-format='%>' --unchanged-group-format='' /tmp/a.txt /tmp/b.txt | xargs` \
-    && apt-get autoclean -y \
-    && apt-get autoremove -y \
+    && apt remove -y `diff --changed-group-format='%>' --unchanged-group-format='' /tmp/a.txt /tmp/b.txt | xargs` \
+    && apt autoclean -y \
+    && apt autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/cache/apt/* /tmp/a.txt /tmp/b.txt
 
 ################################################################################
 # node builder 
 ###############################################################################
-mv Dockerfile_novnc_node_web /docker-ubuntu-vnc-desktop/Dockerfile_novnc_node_web
+ln -sf ${BASEDIR}/Dockerfile_novnc_node_web /docker-ubuntu-vnc-desktop/Dockerfile_novnc_node_web
 cd /docker-ubuntu-vnc-desktop
 docker build -t novnc_node_web -f Dockerfile_novnc_node_web .
 cd -
 ################################################################################
-# merge
+# merge node builder files to host 
 ###############################################################################
 mkdir -p /usr/local/lib/web/frontend/
 docker run --rm -v /usr/local/lib/web/frontend/:/frontend novnc_node_web
@@ -112,21 +154,8 @@ sed -i "s|\(.*supervisord.*\)-n\(.*\)|\1 \2|g" /startup.sh
 
 # generate self signed ssl:
 mkdir -p /etc/nginx/ssl/
-tee /etc/nginx/ssl/openssl.cnf << EOF1
-[ req ]
-prompt = no
-distinguished_name = req_distinguished_name
-
-[ req_distinguished_name ]
-C = GB
-ST = Test State
-L = Test Locality
-O = Org Name
-OU = Org Unit Name
-CN = Common Name
-emailAddress = test@email.com
-EOF1
-openssl req -x509 -config /etc/nginx/ssl/openssl.cnf -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
+ln -sf  ${BASEDIR}/novnc_openssl.cnf /etc/nginx/ssl/novnc_openssl.cnf
+openssl req -x509 -config /etc/nginx/ssl/novnc_openssl.cnf -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
 
 #create user:
 mkdir /home/coder
@@ -134,43 +163,18 @@ adduser --gecos '' --disabled-password coder
 usermod -a -G sudo coder
 chown -R coder:coder /home/coder
 # Set password and other coder user things are handled with noVNC environment
-tee /etc/systemd/novnc_environment.conf << EOF2
-SSL_PORT=443
-USER=coder
-PASSWORD=coderpw
-HOME=/home/coder
-HTTP_PASSWORD=coderpw
-#RESOLUTION=1920x1080
-#X11VNC_ARGS=-multiptr
-EOF2
-# root@ubuntu-focal:~# cat /etc/systemd/system/novnc.service
-tee /etc/systemd/system/novnc.service << END
-[Unit]
-Description=supervisord - Supervisor process control system for UNIX
-Documentation=http://supervisord.org
-After=network.target
 
-[Service]
-#User=coder
-EnvironmentFile=/etc/systemd/novnc_environment.conf
-Type=forking
-ExecStart=/startup.sh
-ExecReload=/usr/bin/supervisorctl reload
-ExecStop=/usr/bin/supervisorctl shutdown
-KillMode=process
-Restart=on-failure
-RestartSec=50s
+# SETUP noVNC SystemD daemon 
+ln -sf ${BASEDIR}/novnc_environment.conf /etc/systemd/novnc_environment.conf 
+ln -sf ${BASEDIR}/novnc.service /etc/systemd/system/novnc.service 
 
-[Install]
-WantedBy=multi-user.target
-END
-
-###
 ####Start up coommands:
 systemctl daemon-reload
 systemctl enable novnc.service
 systemctl start novnc.service
-#STATUS:
+
+# JUST FYI: Manual steps to testing without daemon
+# STATUS:
 # root@ubuntu-focal:~# systemctl status novnc.service
 # ● novnc.service - supervisord - Supervisor process control system for UNIX
 #      Loaded: loaded (/etc/systemd/system/novnc.service; enabled; vendor preset: enabled)
@@ -205,8 +209,3 @@ systemctl start novnc.service
 ## MANUAL KILL:
 # kill -9 `echo $(ps aux | egrep -i "nginx|vnc|supervisord|Xvfb|openbox|lxpanel|pcmanfm" | grep -v grep | awk '{print $2}')`
 # kill -9 `echo $(lsof -i -P -n | egrep "nginx|python|vnc" | awk '{print $2}')`
-
-### NOTE: Just require more ENV variables than normal systemctl shell offer
-#Define those to: novnc.service 
-#EnvironmentFile=/etc/my_service/my_service.conf
-#Environment="FOO=bar"

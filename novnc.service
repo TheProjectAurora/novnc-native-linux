@@ -1,0 +1,18 @@
+[Unit]
+Description=supervisord - Supervisor process control system for UNIX
+Documentation=http://supervisord.org
+After=network.target
+
+[Service]
+#User=coder
+EnvironmentFile=/etc/systemd/novnc_environment.conf
+Type=forking
+ExecStart=/startup.sh
+ExecReload=/usr/bin/supervisorctl reload
+ExecStop=/usr/bin/supervisorctl shutdown
+KillMode=process
+Restart=on-failure
+RestartSec=50s
+
+[Install]
+WantedBy=multi-user.target
