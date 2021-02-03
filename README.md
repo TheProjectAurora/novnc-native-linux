@@ -12,7 +12,7 @@ NoVNC offers a full X-windows experience that is usable over browser. This repos
 BEHAVIOR:
 * Install required tools to host
 * Open with browser to https://IP <= user:**coder** pw: **coderpw** (defined in novnc_environment.conf )
-* NoVNC session oppened to browser and offer full linux desktop
+* NoVNC session opened to browser and offer full linux desktop
 * Left bottom corner of noVNC desktop is arrow where open main menu of linux desctop
 >**FYI**: Google Chrome eats a lot of cpu&mem so Firefox browser is recomended to be used.
 
