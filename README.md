@@ -50,7 +50,7 @@ Box creation happened with Packer so require also it: https://www.packer.io/
 ```
 config.vm.network "forwarded_port", guest: 443, host: 443
 ```
-1. Start vagrant: `vagrant up`
+6. Start vagrant: `vagrant up`
 1. Test as in https://github.com/TheProjectAurora/novnc-native-linux#BEHAVIOR:
 1. Delete vm: `vagrant destroy`
 1. Delete created stuff: `cd .. && rm -Rf output-novnc owbox`
