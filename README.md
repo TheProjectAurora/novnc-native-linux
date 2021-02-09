@@ -32,7 +32,7 @@ NOTE. If you want to change username then it should be done in many places. So i
 1. Public connection to host have to be limited by using cloud provider tools (it is recommended that just your IP or subnet could take connection to host)
 1. There is no guarantee of security of 3rd party SW like noVNC
 
-# ADDONS/ ESTING
+# ADDONS/TESTING
 ## Vagrant startup:
 Require tools: https://www.vagrantup.com/ https://www.virtualbox.org/
 1. Start: `vagrant up`
