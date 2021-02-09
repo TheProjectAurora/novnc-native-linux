@@ -1,5 +1,5 @@
 # Purpose:
-NoVNC offer full X-windows experience that is usable over browser. This repository could be used as "bootstrap" to virtual machine when GUI is required. 
+NoVNC offers a full X-windows experience that is usable over browser. This repository could be used as "bootstrap" to virtual machine when GUI is required. 
 
 # Requirements:
 - Ubuntu 20.04
@@ -12,18 +12,18 @@ NoVNC offer full X-windows experience that is usable over browser. This reposito
 BEHAVIOR:
 * Install required tools to host
 * Open with browser to https://IP <= user:**coder** pw: **coderpw** (defined in novnc_environment.conf )
-* NoVNC session oppened to browser and offer full linux desctop
-* Left bottom corner of noVNC desctop is arrow where open main menu of linux desctop
->**FYI**: Google Chrome eat a lot of cpu&mem so firefox browser is recomended to be used.
+* NoVNC session opened to browser and offer full linux desktop
+* Left bottom corner of noVNC desktop is arrow where open main menu of linux desctop
+>**FYI**: Google Chrome eats a lot of cpu&mem so Firefox browser is recomended to be used.
 
 # MODIFY SETTING (resolution, PW, etc.):
-NOTE. If you wanna change username then it should be done in many places. So it is recommendation to use 
+NOTE. If you want to change username then it should be done in many places. So it is recommendation to use 
 1. Edit novnc_environment.conf file
 1. Reboot VM (with reboot novnc systemd daemon is loaded pefectry, restart of daemon could work ok)
 
 # Known problems (Existing features):
-* Copy-Paste between noVNC<->HOST happened by using noVNC desctop left side menu (click arrow in center of noVNC window) and open clipboard by using it icon in menu. This is a textbox where you should paste your copy from HOST and then it could be pasted to noVNC side. Copying from noVNC to HOST happened by using same method but vise-versa way.
-* CapsLock could seem to be out of sync between noVNC desktop and HOST. That why change CapsLock status allways in HOST side window (e.g. by using host browser url row)
+* Copy-Paste between noVNC<->HOST happens by using noVNC desctop left side menu (click arrow in center of noVNC window) and open clipboard by using it icon in menu. This is a textbox where you should paste your copy from HOST and then it could be pasted to noVNC side. Copying from noVNC to HOST happens by using same method but vice versa way.
+* CapsLock could seem to be out of sync between noVNC desktop and HOST. That's why change CapsLock status always in HOST side window (e.g. by using host browser url row)
 
 # SECURITY:
 1. Only 443 port should be opened to host
@@ -36,6 +36,7 @@ NOTE. If you wanna change username then it should be done in many places. So it 
 1. Kickup: `vagrant up`
 1. Check USAGE how to use
 1. Destroy: `vagrant destroy`
+<<<<<<< HEAD
 
 # ADDONS
 ## Vagrant startup:
@@ -57,3 +58,5 @@ Box creation happened with: https://www.packer.io/
 1. Test as in BEHAVIOR in https://github.com/TheProjectAurora/novnc-native-linux#usage
 1. Delete: `vagrant destroy`
 1. Delete packer stuff: `cd .. && rm -Rf output-novnc owbox`
+=======
+>>>>>>> 453573d537db35447677ee2260ae324e88e2a311
