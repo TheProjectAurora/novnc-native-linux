@@ -54,6 +54,6 @@ Box creation happened with: https://www.packer.io/
 1. Add 443=>443 port forwarding to Vagrantfile by editing it and adding folowing line:
 ```config.vm.network "forwarded_port", guest: 443, host: 443```
 1. Start vagrant: `vagrant up`
-1. Test as in BEHAVIOR in https://github.com/TheProjectAurora/novnc-native-linux#usage
+1. Test as in https://github.com/TheProjectAurora/novnc-native-linux#BEHAVIOR:
 1. Delete: `vagrant destroy`
 1. Delete packer stuff: `cd .. && rm -Rf output-novnc owbox`
