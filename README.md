@@ -36,7 +36,6 @@ NOTE. If you want to change username then it should be done in many places. So i
 1. Kickup: `vagrant up`
 1. Check USAGE how to use
 1. Destroy: `vagrant destroy`
-<<<<<<< HEAD
 
 # ADDONS
 ## Vagrant startup:
@@ -58,5 +57,3 @@ Box creation happened with: https://www.packer.io/
 1. Test as in BEHAVIOR in https://github.com/TheProjectAurora/novnc-native-linux#usage
 1. Delete: `vagrant destroy`
 1. Delete packer stuff: `cd .. && rm -Rf output-novnc owbox`
-=======
->>>>>>> 453573d537db35447677ee2260ae324e88e2a311
