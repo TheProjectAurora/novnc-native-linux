@@ -36,3 +36,24 @@ NOTE. If you wanna change username then it should be done in many places. So it 
 1. Kickup: `vagrant up`
 1. Check USAGE how to use
 1. Destroy: `vagrant destroy`
+
+# ADDONS
+## Vagrant startup:
+Require tools: https://www.vagrantup.com/ https://www.virtualbox.org/
+1. Start: `vagrant up`
+1. Test as in BEHAVIOR in https://github.com/TheProjectAurora/novnc-native-linux#usage 
+1. Delete: `vagrant destroy`
+
+## Create&Test Vagrant BOX
+Require same tools than 
+Box creation happened with: https://www.packer.io/
+1. Execute: `packer build novnc.pkr.hcl`
+1. Create folder and go there: `mkdir owbox && cd ownbox`
+1. Import BOX: `vagrant box add novnc ../output-novnc/package.box`
+1. Init vagrant: `vagrant init novnc`
+1. Add 443=>443 port forwarding to Vagrantfile by editing it and adding folowing line:
+```config.vm.network "forwarded_port", guest: 443, host: 443```
+1. Start vagrant: `vagrant up`
+1. Test as in BEHAVIOR in https://github.com/TheProjectAurora/novnc-native-linux#usage
+1. Delete: `vagrant destroy`
+1. Delete packer stuff: `cd .. && rm -Rf output-novnc owbox`
