@@ -32,27 +32,24 @@ NOTE. If you want to change username then it should be done in many places. So i
 1. Public connection to host have to be limited by using cloud provider tools (it is recommended that just your IP or subnet could take connection to host)
 1. There is no guarantee of security of 3rd party SW like noVNC
 
-# TESTING:
-1. Kickup: `vagrant up`
-1. Check USAGE how to use
-1. Destroy: `vagrant destroy`
-
-# ADDONS
+# ADDONS/ ESTING
 ## Vagrant startup:
 Require tools: https://www.vagrantup.com/ https://www.virtualbox.org/
 1. Start: `vagrant up`
 1. Test as in https://github.com/TheProjectAurora/novnc-native-linux#BEHAVIOR:
 1. Delete: `vagrant destroy`
 
-## Create&Test Vagrant BOX
-Require same tools than 
-Box creation happened with: https://www.packer.io/
+## Create&Test Vagrant BOX with Packer and Vagrant
+Require same tools than https://github.com/TheProjectAurora/novnc-native-linux#vagrant-startup
+Box creation happened with Packer so require also it: https://www.packer.io/
 1. Execute: `packer build novnc.pkr.hcl`
 1. Create folder and go there: `mkdir owbox && cd ownbox`
 1. Import BOX: `vagrant box add novnc ../output-novnc/package.box`
 1. Init vagrant: `vagrant init novnc`
 1. Add 443=>443 port forwarding to Vagrantfile by editing it and adding folowing line:
-```config.vm.network "forwarded_port", guest: 443, host: 443```
+```
+config.vm.network "forwarded_port", guest: 443, host: 443
+```
 1. Start vagrant: `vagrant up`
 1. Test as in https://github.com/TheProjectAurora/novnc-native-linux#BEHAVIOR:
 1. Delete: `vagrant destroy`
