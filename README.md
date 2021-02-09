@@ -52,5 +52,6 @@ config.vm.network "forwarded_port", guest: 443, host: 443
 ```
 1. Start vagrant: `vagrant up`
 1. Test as in https://github.com/TheProjectAurora/novnc-native-linux#BEHAVIOR:
-1. Delete: `vagrant destroy`
-1. Delete packer stuff: `cd .. && rm -Rf output-novnc owbox`
+1. Delete vm: `vagrant destroy`
+1. Delete created stuff: `cd .. && rm -Rf output-novnc owbox`
+1. Delete delete vagrant box: `vagrant box remove novnc`
