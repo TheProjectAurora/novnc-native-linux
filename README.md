@@ -9,7 +9,7 @@ NoVNC offers a full X-windows experience that is usable over browser. This repos
 1. Clone repo to VM in bootstrap
 1. Execute `novnc_install.sh` in bootstrap
 
-BEHAVIOR:
+### BEHAVIOR:
 * Install required tools to host
 * Open with browser to https://IP <= user:**coder** pw: **coderpw** (defined in novnc_environment.conf )
 * NoVNC session opened to browser and offer full linux desktop
@@ -41,7 +41,7 @@ NOTE. If you want to change username then it should be done in many places. So i
 ## Vagrant startup:
 Require tools: https://www.vagrantup.com/ https://www.virtualbox.org/
 1. Start: `vagrant up`
-1. Test as in BEHAVIOR in https://github.com/TheProjectAurora/novnc-native-linux#usage 
+1. Test as in https://github.com/TheProjectAurora/novnc-native-linux#BEHAVIOR:
 1. Delete: `vagrant destroy`
 
 ## Create&Test Vagrant BOX
